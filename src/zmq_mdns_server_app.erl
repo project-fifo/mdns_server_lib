@@ -10,7 +10,21 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    zmq_mdns_server_sup:start_link().
+    {ok, Domain} = application:get_env(zmq_mdns_server, domain),
+    {ok, Service} = application:get_env(zmq_mdns_server, service),
+    {ok, IP} = application:get_env(zmq_mdns_server, ip),
+    {ok, Port} = application:get_env(zmq_mdns_server, port),
+    {ok, Handler} = application:get_env(zmq_mdns_server, handler),
+    MDNSConfig=[{port, 5353},
+		{address, {224, 0, 0, 251}},
+		{domain, Domain},
+		{type, "_" ++ Service ++ "._zeromq._tcp"},
+		{options, 
+		 [{port, Port},
+		  {ip, IP}]}],
+    io:format("mDNS Config: ~p.~n", [MDNSConfig]),
+    {ok, _} = mdns_server_supervisor:start_link([MDNSConfig]),
+    zmq_mdns_server_sup:start_link(Handler).
 
 stop(_State) ->
     ok.

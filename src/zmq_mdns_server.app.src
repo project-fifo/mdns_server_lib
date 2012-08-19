@@ -8,5 +8,10 @@
                   stdlib
                  ]},
   {mod, { zmq_mdns_server_app, []}},
-  {env, []}
+  {env, [{domain, ".local"},
+	 {service, "generic"},
+	 {ip, "127.0.0.1"},
+	 {port, "4223"},
+	 {handler, zmq_mdns_server_debug_handler}
+	]}
  ]}.
