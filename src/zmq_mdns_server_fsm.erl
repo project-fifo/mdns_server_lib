@@ -91,16 +91,22 @@ reading(_Event, #state{socket = Socket,
 		       handler = Handler,
 		       handler_state = HandlerState} = State) ->
     {ok, BinData} = erlzmq:recv(Socket),
-    Data = binary_to_term(BinData),
-    case Handler:message(Data, HandlerState) of
-	{reply, Reply, HandlerState1} ->
-	    erlzmq:send(Socket, term_to_binary({reply, Reply})),
-	    {next_state, reading, State#state{handler_state = HandlerState1}, 0};
-	{noreply, HandlerState1} ->
-	    erlzmq:send(Socket, term_to_binary(noreply)),
-	    {next_state, reading, State#state{handler_state = HandlerState1}, 0};
-	{stop, _} ->
-	    {stop, normal, State}
+
+    case binary_to_term(BinData) of
+	ping ->
+	    erlzmq:send(Socket, <<"pong">>),
+	    {next_state, reading, State, 0};
+	Data ->
+	    case Handler:message(Data, HandlerState) of
+		{reply, Reply, HandlerState1} ->
+		    erlzmq:send(Socket, term_to_binary({reply, Reply})),
+		    {next_state, reading, State#state{handler_state = HandlerState1}, 0};
+		{noreply, HandlerState1} ->
+		    erlzmq:send(Socket, term_to_binary(noreply)),
+		    {next_state, reading, State#state{handler_state = HandlerState1}, 0};
+		{stop, _} ->
+		    {stop, normal, State}
+	    end
     end.
 
 
