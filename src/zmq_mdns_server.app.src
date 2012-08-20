@@ -5,7 +5,9 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  erlzmq,
+                  mdns_server
                  ]},
   {mod, { zmq_mdns_server_app, []}},
   {env, [{domain, ".local"},
