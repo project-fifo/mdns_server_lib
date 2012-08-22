@@ -58,7 +58,6 @@ start_link(Handler) ->
 %% @end
 %%--------------------------------------------------------------------
 init([Handler]) ->
-    io:format("~p~n", [Handler]),
     {ok, IP} = application:get_env(zmq_mdns_server, ip),
     {ok, Port} = application:get_env(zmq_mdns_server, port),
     Endpoint = "tcp://" ++ IP ++ ":" ++ Port,

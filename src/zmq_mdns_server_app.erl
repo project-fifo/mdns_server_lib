@@ -22,7 +22,6 @@ start(_StartType, _StartArgs) ->
 		{options, 
 		 [{port, Port},
 		  {ip, IP}]}],
-    io:format("mDNS Config: ~p.~n", [MDNSConfig]),
     {ok, _} = mdns_server_supervisor:start_link([MDNSConfig]),
     zmq_mdns_server_sup:start_link(Handler).
 
