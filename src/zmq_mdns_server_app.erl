@@ -22,6 +22,8 @@ start(_StartType, _StartArgs) ->
 		{options, 
 		 [{port, Port},
 		  {ip, IP}]}],
+    {ok, _} = ranch:start_listener(mdns_server, 1,
+				   ranch_tcp, [{port, Port}], mdns_server_protocol, []),
     {ok, _} = mdns_server_supervisor:start_link([MDNSConfig]),
     zmq_mdns_server_sup:start_link(Handler).
 

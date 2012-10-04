@@ -4,7 +4,7 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/1]).
+-export([start_link/0]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -18,12 +18,12 @@
 %% API functions
 %% ===================================================================
 
-start_link(Handler) ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, [Handler]).
+start_link() ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
 
-init([Handler]) ->
-    {ok, {{one_for_one, 5, 10}, [?CHILD(zmq_mdns_server_fsm, worker, [Handler])]}}.
+init([]) ->
+    {ok, {{one_for_one, 5, 10}, []}}.
