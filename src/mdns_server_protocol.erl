@@ -14,7 +14,7 @@ init(ListenerPid, Socket, Transport, Handler, _Opts = []) ->
 loop(Handler, Socket, Transport, HandlerState) ->
     case Transport:recv(Socket, 0, 5000) of
 	{ok, BinData} ->
-	    case term_to_binary(BinData) of
+	    case binary_to_term(BinData) of
 		ping ->
 		    Transport:send(Socket, <<"pong">>),
 		    ok = Transport:close(Socket);

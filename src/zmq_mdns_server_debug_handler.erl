@@ -8,4 +8,4 @@ init(_Opts) ->
 
 message(Data, State) ->
     io:format("[zmq] ~p~n", [Data]),
-    {noreply, State}.
+    {reply, Data, State}.
