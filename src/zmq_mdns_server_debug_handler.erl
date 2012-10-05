@@ -3,7 +3,7 @@
 
 -export([init/1, message/2]).
 
-init([]) ->
+init(_Opts) ->
     {ok, stateless}.
 
 message(Data, State) ->

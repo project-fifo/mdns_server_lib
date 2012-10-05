@@ -14,7 +14,6 @@ start(_StartType, _StartArgs) ->
     {ok, Service} = application:get_env(zmq_mdns_server, service),
     {ok, IP} = application:get_env(zmq_mdns_server, ip),
     {ok, Port} = application:get_env(zmq_mdns_server, port),
-    {ok, Handler} = application:get_env(zmq_mdns_server, handler),
     MDNSConfig=[{port, 5353},
 		{address, {224, 0, 0, 251}},
 		{domain, Domain},
@@ -25,7 +24,7 @@ start(_StartType, _StartArgs) ->
     {ok, _} = ranch:start_listener(mdns_server, 1,
 				   ranch_tcp, [{port, Port}], mdns_server_protocol, []),
     {ok, _} = mdns_server_supervisor:start_link([MDNSConfig]),
-    zmq_mdns_server_sup:start_link(Handler).
+    zmq_mdns_server_sup:start_link().
 
 stop(_State) ->
     ok.
