@@ -1,3 +1,7 @@
 erl_crash.dump
 deps
 ebin
+doc/*.html
+doc/*.png
+doc/*.css
+doc/edoc-info

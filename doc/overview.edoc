@@ -1,0 +1,11 @@
+@author Heinz N. Gies <heinz@licenser.net>
+@copyright 2012 Heinz N. Gies
+@version 0.1.0
+@title Welcome to the mdns_server_lib library!
+@doc `mdns_server_lib' is the server component of the mdns library.
+     It allows setting up a service that broadcasts it's presence over
+     mDNS and accepts TCP connections to handle requests.
+     Setting `handler' as an env variable will make this library hand 
+     all incoming requests to this hander.
+     Please see the `mdns_server_lib_debug_handler' for an example 
+     implementation, it is a simple echo service.
