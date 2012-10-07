@@ -1,4 +1,4 @@
--module(zmq_mdns_server_debug_handler).
+-module(mdns_server_lib_debug_handler).
 
 
 -export([init/1, message/2]).

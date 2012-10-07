@@ -2,7 +2,7 @@
 -export([start_link/4, init/5]).
 
 start_link(ListenerPid, Socket, Transport, Opts) ->
-    {ok, Handler} = application:get_env(zmq_mdns_server, handler),
+    {ok, Handler} = application:get_env(mdns_server_lib, handler),
     Pid = spawn_link(?MODULE, init, [ListenerPid, Socket, Transport, Handler, Opts]),
     {ok, Pid}.
 

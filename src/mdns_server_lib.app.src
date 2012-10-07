@@ -1,4 +1,4 @@
-{application, zmq_mdns_server,
+{application, mdns_server_lib,
  [
   {description, ""},
   {vsn, "1"},
@@ -8,11 +8,11 @@
                   stdlib,
                   ranch
                  ]},
-  {mod, { zmq_mdns_server_app, []}},
+  {mod, { mdns_server_lib_app, []}},
   {env, [{domain, ".local"},
 	 {service, "generic"},
 	 {ip, "127.0.0.1"},
 	 {port, 4223},
-	 {handler, zmq_mdns_server_debug_handler}
+	 {handler, mdns_server_lib_debug_handler}
 	]}
  ]}.

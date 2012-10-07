@@ -1,5 +1,5 @@
 
--module(zmq_mdns_server_sup).
+-module(mdns_server_lib_sup).
 
 -behaviour(supervisor).
 
