@@ -7,6 +7,7 @@ start_link(ListenerPid, Socket, Transport, Opts) ->
     {ok, Pid}.
 
 init(ListenerPid, Socket, Transport, Handler, _Opts = []) ->
+    Transport:setopts(Socket, [{packet, 4}]),
     ok = ranch:accept_ack(ListenerPid),
     {ok, State} = Handler:init([]),
     loop(Handler, Socket, Transport, State).
@@ -16,7 +17,7 @@ loop(Handler, Socket, Transport, HandlerState) ->
 	{ok, BinData} ->
 	    case binary_to_term(BinData) of
 		ping ->
-		    Transport:send(Socket, <<"pong">>),
+		    Transport:send(Socket, term_to_binary(pong)),
 		    ok = Transport:close(Socket);
 		Data ->
 		    case Handler:message(Data, HandlerState) of
