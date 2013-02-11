@@ -23,8 +23,9 @@ start_link(ListenerPid, Socket, Transport, Opts) ->
     proc_lib:start_link(?MODULE, init, [[ListenerPid, Socket, Transport, Opts, Handler]]).
 
 init([ListenerPid, Socket, Transport, Handler, _Opts = [], Handler]) ->
-    ok = Transport:setopts(Socket, [{active, true}, {packet,4}]),
+    ok = proc_lib:init_ack({ok, self()}),
     ok = ranch:accept_ack(ListenerPid),
+    ok = Transport:setopts(Socket, [{active, true}, {packet,4}]),
     {OK, Closed, Error} = Transport:messages(),
     {ok, State} = Handler:init(self(), []),
     gen_server:enter_loop(?MODULE, [], #state{
