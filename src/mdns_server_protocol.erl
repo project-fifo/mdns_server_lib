@@ -19,10 +19,10 @@
 
 
 start_link(ListenerPid, Socket, Transport, Opts) ->
-    {ok, Handler} = application:get_env(mdns_server_lib, handler),
-    proc_lib:start_link(?MODULE, init, [[ListenerPid, Socket, Transport, Opts, Handler]]).
+    proc_lib:start_link(?MODULE, init, [[ListenerPid, Socket, Transport, Opts]]).
 
-init([ListenerPid, Socket, Transport, Handler, _Opts = [], Handler]) ->
+init([ListenerPid, Socket, Transport, Handler, _Opts = []]) ->
+    {ok, Handler} = application:get_env(mdns_server_lib, handler),
     ok = proc_lib:init_ack({ok, self()}),
     ok = ranch:accept_ack(ListenerPid),
     ok = Transport:setopts(Socket, [{active, true}, {packet,4}]),
