@@ -10,8 +10,9 @@ clean: clean-docs
 clean-docs:
 	rm doc/*.html doc/*.png doc/*.css doc/edoc-info
 
-test: compile
-	@$(REBAR) eunit
+test: all
+        $(REBAR) skip_deps=true xref
+        $(REBAR) skip_deps=true eunit
 
 docs: clean-docs
 	@$(REBAR) doc skip_deps=true

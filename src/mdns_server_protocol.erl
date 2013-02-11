@@ -14,6 +14,7 @@
                 ok,
                 error,
                 closed,
+                claim = false,
                 handler,
                 handler_state}).
 
@@ -49,8 +50,21 @@ handle_info({_Closed, _Socket}, State = #state{
     end,
     {stop, normal, State};
 
+handle_info({data, Data}, State = #state{socket = Socket,
+                                        transport = Transport}) ->
+    Transport:send(Socket, binary_to_term({data, Data})),
+    {noreply, State};
+
+handle_info(Info, State = #state{
+                    handler_state = HandlerState,
+                    handler = Handler,
+                    claim = true}) ->
+    Handler:raw(Info, HandlerState),
+    {noreply, State};
+
 handle_info({_OK, Socket, BinData}, State = #state{
                                       handler = Handler,
+                                      claim = false,
                                       handler_state = HandlerState,
                                       transport = Transport,
                                       ok = _OK}) ->
@@ -60,6 +74,10 @@ handle_info({_OK, Socket, BinData}, State = #state{
             ok = Transport:close(Socket);
         Data ->
             case Handler:message(Data, HandlerState) of
+                {claim, HandlerState1} ->
+                    Transport:send(Socket, term_to_binary(noreply)),
+                    {noreply, State#state{claim = true,
+                                          handler_state = HandlerState1}};
                 {reply, Reply, HandlerState1} ->
                     Transport:send(Socket, term_to_binary({reply, Reply})),
                     {noreply, State#state{handler_state = HandlerState1}};
@@ -89,15 +107,9 @@ handle_info({_OK, Socket, BinData}, State = #state{
             end
     end;
 
-handle_info({data,Data}, State = #state{socket = Socket,
-                                        transport = Transport}) ->
-    Transport:send(Socket, binary_to_term({data, Data})),
-    {noreply, State};
-
 handle_info(Info, State) ->
     lager:warning("[mdns server] Unknown message: ~p ",
                   [Info]),
-
     {noreply, State}.
 
 handle_call(_Request, _From, State) ->
