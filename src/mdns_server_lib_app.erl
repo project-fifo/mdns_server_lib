@@ -17,7 +17,7 @@ start(_StartType, _StartArgs) ->
     MDNSConfig=[{port, 5353},
 		{address, {224, 0, 0, 251}},
 		{domain, Domain},
-		{type, "_" ++ Service ++ "._zeromq._tcp"},
+		{type, "_" ++ Service ++ "._tcp"},
 		{options, 
 		 [{port, Port},
 		  {ip, IP}]}],
