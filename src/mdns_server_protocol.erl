@@ -1,36 +1,112 @@
 -module(mdns_server_protocol).
--export([start_link/4, init/5]).
+
+-behaviour(gen_server).
+-behaviour(ranch_protocol).
+
+-export([start_link/4,
+         init/1, handle_call/3, handle_cast/2, handle_info/2,
+         terminate/2, code_change/3]).
+
+-ignore_xref([start_link/4]).
+
+-record(state, {socket,
+                transport,
+                ok,
+                error,
+                closed,
+                handler,
+                handler_state}).
+
 
 start_link(ListenerPid, Socket, Transport, Opts) ->
     {ok, Handler} = application:get_env(mdns_server_lib, handler),
-    Pid = spawn_link(?MODULE, init, [ListenerPid, Socket, Transport, Handler, Opts]),
-    {ok, Pid}.
+    proc_lib:start_link(?MODULE, init, [[ListenerPid, Socket, Transport, Opts, Handler]]).
 
-init(ListenerPid, Socket, Transport, Handler, _Opts = []) ->
-    Transport:setopts(Socket, [{packet, 4}]),
+init([ListenerPid, Socket, Transport, Handler, _Opts = [], Handler]) ->
+    ok = Transport:setopts(Socket, [{active, true}, {packet,4}]),
     ok = ranch:accept_ack(ListenerPid),
-    {ok, State} = Handler:init([]),
-    loop(Handler, Socket, Transport, State).
+    {OK, Closed, Error} = Transport:messages(),
+    {ok, State} = Handler:init(self(), []),
+    gen_server:enter_loop(?MODULE, [], #state{
+                                     handler_state = State,
+                                     ok = OK,
+                                     closed = Closed,
+                                     error = Error,
+                                     socket = Socket,
+                                     handler = Handler,
+                                     transport = Transport}).
 
-loop(Handler, Socket, Transport, HandlerState) ->
-    case Transport:recv(Socket, 0, 5000) of
-	{ok, BinData} ->
-	    case binary_to_term(BinData) of
-		ping ->
-		    Transport:send(Socket, term_to_binary(pong)),
-		    ok = Transport:close(Socket);
-		Data ->
-		    case Handler:message(Data, HandlerState) of
-			{reply, Reply, HandlerState1} ->
-			    Transport:send(Socket, term_to_binary({reply, Reply})),
-			    loop(Handler, Socket, Transport, HandlerState1);
-			{noreply, HandlerState1} ->
-			    Transport:send(Socket, term_to_binary(noreply)),
-			    loop(Handler, Socket, Transport, HandlerState1);
-			{stop, _} ->
-			    ok = Transport:close(Socket)
-		    end
-	    end;
-	_ ->
-	    ok = Transport:close(Socket)
-    end.
+handle_info({_Closed, _Socket}, State = #state{
+                                  handler = Handler,
+                                  handler_state = HandlerState,
+                                  closed = _Closed}) ->
+    case erlang:function_exported(Handler, close, 1) of
+        false ->
+            ok;
+        true ->
+            Handler:close(HandlerState)
+    end,
+    {stop, normal, State};
+
+handle_info({_OK, Socket, BinData}, State = #state{
+                                      handler = Handler,
+                                      handler_state = HandlerState,
+                                      transport = Transport,
+                                      ok = _OK}) ->
+    case binary_to_term(BinData) of
+        ping ->
+            Transport:send(Socket, term_to_binary(pong)),
+            ok = Transport:close(Socket);
+        Data ->
+            case Handler:message(Data, HandlerState) of
+                {reply, Reply, HandlerState1} ->
+                    Transport:send(Socket, term_to_binary({reply, Reply})),
+                    {noreply, State#state{handler_state = HandlerState1}};
+                {noreply, HandlerState1} ->
+                    Transport:send(Socket, term_to_binary(noreply)),
+                    {noreply, State#state{handler_state = HandlerState1}};
+                {stop, normal, Reply, HandlerState1} ->
+                    Transport:send(Socket, term_to_binary({reply, Reply})),
+                    ok = Transport:close(Socket),
+                    {stop, normal, State#state{handler_state = HandlerState1}};
+                {stop, normal, HandlerState1} ->
+                    Transport:send(Socket, term_to_binary(noreply)),
+                    ok = Transport:close(Socket),
+                    {stop, normal, State#state{handler_state = HandlerState1}};
+                {stop, Reason, Reply, HandlerState1} ->
+                    Transport:send(Socket, term_to_binary({reply, Reply})),
+                    lager:warning("[mdns server] Abnormal Stop(~p), Reply: ~p / handler state was: ~p ",
+                                  [Reason, Reply, HandlerState1]),
+                    ok = Transport:close(Socket),
+                    {stop, Reason, State#state{handler_state = HandlerState1}};
+                {stop, Reason, HandlerState1} ->
+                    Transport:send(Socket, term_to_binary(noreply)),
+                    lager:warning("[mdns server] Abnormal Stop(~p), handler state was: ~p",
+                                  [Reason, HandlerState1]),
+                    ok = Transport:close(Socket),
+                    {stop, Reason, State#state{handler_state = HandlerState1}}
+            end
+    end;
+
+handle_info({data,Data}, State = #state{socket = Socket,
+                                        transport = Transport}) ->
+    Transport:send(Socket, binary_to_term({data, Data})),
+    {noreply, State};
+
+handle_info(Info, State) ->
+    lager:warning("[mdns server] Unknown message: ~p ",
+                  [Info]),
+
+    {noreply, State}.
+
+handle_call(_Request, _From, State) ->
+    {reply, {error, unknwon}, State}.
+
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+terminate(_Reason, _State) ->
+    ok.
+
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
