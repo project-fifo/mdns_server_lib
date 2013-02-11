@@ -52,15 +52,19 @@ handle_info({_Closed, _Socket}, State = #state{
 
 handle_info({data, Data}, State = #state{socket = Socket,
                                         transport = Transport}) ->
-    Transport:send(Socket, binary_to_term({data, Data})),
+    Transport:send(Socket, binary_to_term(Data)),
     {noreply, State};
 
 handle_info(Info, State = #state{
                     handler_state = HandlerState,
                     handler = Handler,
                     claim = true}) ->
-    Handler:raw(Info, HandlerState),
-    {noreply, State};
+    case Handler:raw(Info, HandlerState) of
+        {ok, HandlerState1} ->
+            {noreply, State#state{handler_state = HandlerState1}};
+        {stop, Reason, HandlerState1} ->
+            {stop, Reason, State#state{handler_state = HandlerState1}}
+        end;
 
 handle_info({_OK, Socket, BinData}, State = #state{
                                       handler = Handler,
