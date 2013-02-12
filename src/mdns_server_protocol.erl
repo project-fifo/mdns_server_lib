@@ -52,7 +52,7 @@ handle_info({_Closed, _Socket}, State = #state{
 
 handle_info({data, Data}, State = #state{socket = Socket,
                                         transport = Transport}) ->
-    Transport:send(Socket, binary_to_term(Data)),
+    Transport:send(Socket, term_to_binary(Data)),
     {noreply, State};
 
 handle_info(Info, State = #state{
