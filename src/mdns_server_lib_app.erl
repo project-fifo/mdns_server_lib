@@ -22,7 +22,7 @@ start(_StartType, _StartArgs) ->
                  [{port, Port},
                   {ip, IP}]}],
     {ok, _} = ranch:start_listener(mdns_server, 1,
-                                   ranch_tcp, [{port, Port}], mdns_server_protocol, []),
+                                   ranch_tcp, [{port, Port}, {ip, IP}], mdns_server_protocol, []),
     {ok, _} = mdns_server_supervisor:start_link([MDNSConfig]),
     mdns_server_lib_sup:start_link().
 
