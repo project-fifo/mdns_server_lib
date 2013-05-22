@@ -21,8 +21,9 @@ start(_StartType, _StartArgs) ->
                 {options,
                  [{port, Port},
                   {ip, IP}]}],
+    [A, B, C, D] = [list_to_integer(binary_to_list(P)) || P <- re:split("10.0.0.10", "[.]")],
     {ok, _} = ranch:start_listener(mdns_server, 1,
-                                   ranch_tcp, [{port, Port}, {ip, IP}], mdns_server_protocol, []),
+                                   ranch_tcp, [{port, Port}, {ip, {A, B, C, D}}], mdns_server_protocol, []),
     {ok, _} = mdns_server_supervisor:start_link([MDNSConfig]),
     mdns_server_lib_sup:start_link().
 
