@@ -10,9 +10,10 @@
                  ]},
   {mod, { mdns_server_lib_app, []}},
   {env, [{domain, ".local"},
-	 {service, "generic"},
-	 {ip, "127.0.0.1"},
-	 {port, 4223},
-	 {handler, mdns_server_lib_debug_handler}
-	]}
+         {service, "generic"},
+         {ip, "127.0.0.1"},
+         {port, 4223},
+         {ttl, 120},
+         {handler, mdns_server_lib_debug_handler}
+        ]}
  ]}.
