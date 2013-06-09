@@ -14,6 +14,7 @@
          {ip, "127.0.0.1"},
          {port, 4223},
          {ttl, 120},
+         {enabled, true},
          {handler, mdns_server_lib_debug_handler}
         ]}
  ]}.
