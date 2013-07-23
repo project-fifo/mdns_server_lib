@@ -75,7 +75,7 @@ handle_info({_OK, Socket, BinData}, State = #state{
     case binary_to_term(BinData) of
         ping ->
             Transport:send(Socket, term_to_binary(pong)),
-            ok = Transport:close(Socket);
+            {noreply, State};
         Data ->
             case Handler:message(Data, HandlerState) of
                 {claim, HandlerState1} ->
