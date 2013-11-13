@@ -17,7 +17,7 @@
 {translation,
  "mdns_server_lib.ip",
  fun(Conf) ->
-         {IP, _Port} = proplists:get_value("mdns.server.endpoint", Conf),
+         {ok, {IP, _Port}} = proplists:get_value("mdns.server.endpoint", Conf),
          IP
  end
 }.
@@ -25,8 +25,8 @@
 {translation,
  "mdns_server_lib.port",
  fun(Conf) ->
-         {IP, _Port} = proplists:get_value("mdns.server.endpoint", Conf),
-         IP
+         {ok, {_IP, Port}} = proplists:get_value("mdns.server.endpoint", Conf),
+         Port
  end
 }.
 
