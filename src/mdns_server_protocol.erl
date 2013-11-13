@@ -30,18 +30,18 @@ init([ListenerPid, Socket, Transport, _Opts = []]) ->
     {OK, Closed, Error} = Transport:messages(),
     {ok, State} = Handler:init(self(), []),
     gen_server:enter_loop(?MODULE, [], #state{
-                                     handler_state = State,
-                                     ok = OK,
-                                     closed = Closed,
-                                     error = Error,
-                                     socket = Socket,
-                                     handler = Handler,
-                                     transport = Transport}).
+                                          handler_state = State,
+                                          ok = OK,
+                                          closed = Closed,
+                                          error = Error,
+                                          socket = Socket,
+                                          handler = Handler,
+                                          transport = Transport}).
 
 handle_info({_Closed, _Socket}, State = #state{
-                                  handler = Handler,
-                                  handler_state = HandlerState,
-                                  closed = _Closed}) ->
+                                           handler = Handler,
+                                           handler_state = HandlerState,
+                                           closed = _Closed}) ->
     case erlang:function_exported(Handler, close, 1) of
         false ->
             ok;
@@ -51,27 +51,27 @@ handle_info({_Closed, _Socket}, State = #state{
     {stop, normal, State};
 
 handle_info({data, Data}, State = #state{socket = Socket,
-                                        transport = Transport}) ->
+                                         transport = Transport}) ->
     Transport:send(Socket, term_to_binary(Data)),
     {noreply, State};
 
 handle_info(Info, State = #state{
-                    handler_state = HandlerState,
-                    handler = Handler,
-                    claim = true}) ->
+                             handler_state = HandlerState,
+                             handler = Handler,
+                             claim = true}) ->
     case Handler:raw(Info, HandlerState) of
         {ok, HandlerState1} ->
             {noreply, State#state{handler_state = HandlerState1}};
         {stop, Reason, HandlerState1} ->
             {stop, Reason, State#state{handler_state = HandlerState1}}
-        end;
+    end;
 
 handle_info({_OK, Socket, BinData}, State = #state{
-                                      handler = Handler,
-                                      claim = false,
-                                      handler_state = HandlerState,
-                                      transport = Transport,
-                                      ok = _OK}) ->
+                                               handler = Handler,
+                                               claim = false,
+                                               handler_state = HandlerState,
+                                               transport = Transport,
+                                               ok = _OK}) ->
     case binary_to_term(BinData) of
         ping ->
             Transport:send(Socket, term_to_binary(pong)),

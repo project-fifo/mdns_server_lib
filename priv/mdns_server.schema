@@ -1,0 +1,30 @@
+%% -*- erlang -*-
+%% @doc Domain this listener is listening to.
+{mapping, "mdns.server.domain", "mdns_server_lib.domain",
+ [{default, ".local"},
+  {datatype, string}]}.
+
+%% @doc The service to listen to, it will be prepended to the domain.
+{mapping, "mdns.server.service", "mdns_server_lib.service",
+ [{default, "generic"},
+  {datatype, string}]}.
+
+%% @doc The TCP endpoint's IP that will be broadcasted.
+{mapping, "mdns.server.endpoint.ip", "mdns_server_lib.ip",
+ [{default, "127.0.0.1"},
+  {datatype, string}]}. % this should be IP but IP requires a port.
+
+%% @doc The TCP endpoint's port that will be broadcasted.
+{mapping, "mdns.server.endpoint.port", "mdns_server_lib.port",
+ [{default, 4223},
+  {datatype, integer}]}. % this should be IP but IP requires a port.
+
+%% @doc The livetime of a broadcast, alsot he rebroadcast frequency
+{mapping, "mdns.server.ttl", "mdns_server_lib.ttl",
+ [{default, 120},
+  {datatype, integer}]}.
+
+%% @doc The handler that gets called for a tcp connections.
+{mapping, "mdns.server.handler", "mdns_server_lib.handler",
+ [{default, mdns_server_lib_debug_handler},
+  {datatype, atom}]}.
