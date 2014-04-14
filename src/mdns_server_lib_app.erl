@@ -12,8 +12,14 @@
 start(_StartType, _StartArgs) ->
     {ok, Domain} = application:get_env(mdns_server_lib, domain),
     {ok, Service} = application:get_env(mdns_server_lib, service),
-    {ok, IP} = application:get_env(mdns_server_lib, ip),
-    {ok, Port} = application:get_env(mdns_server_lib, port),
+    {IP, Port} = case application:get_env(mdns_server_lib, listener) of
+                     {ok, R} ->
+                         R;
+                     _ ->
+                         {ok, IPx} = application:get_env(mdns_server_lib, ip),
+                         {ok, Portx} = application:get_env(mdns_server_lib, port),
+                         {IPx, Portx}
+                 end,
     {ok, TTL} = application:get_env(mdns_server_lib, ttl),
     MDNSConfig0 = [{port, 5353},
                    {address, {224, 0, 0, 251}},

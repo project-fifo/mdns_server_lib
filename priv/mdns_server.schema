@@ -11,25 +11,9 @@
   {datatype, string}]}.
 
 %% @doc The TCP endpoint that will be broadcasted.
-{mapping, "mdns.server.endpoint", "mdns_server_lib.endpoint",
+{mapping, "mdns.server.endpoint", "mdns_server_lib.listener",
  [{default, {"127.0.0.1", 4223}},
   {datatype, ip}]}.
-
-{translation,
- "mdns_server_lib.ip",
- fun(Conf) ->
-         {IP, _Port} = cuttlefish_util:conf_get_value("mdns.server.endpoint", Conf),
-         IP
- end
-}.
-
-{translation,
- "mdns_server_lib.port",
- fun(Conf) ->
-         {_IP, Port} = cuttlefish_util:conf_get_value("mdns.server.endpoint", Conf),
-         Port
- end
-}.
 
 %% @doc The livetime of a broadcast, alsot he rebroadcast frequency
 {mapping, "mdns.server.ttl", "mdns_server_lib.ttl",
