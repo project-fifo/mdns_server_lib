@@ -18,7 +18,7 @@
 %% @doc The livetime of a broadcast, alsot he rebroadcast frequency
 {mapping, "mdns.server.ttl", "mdns_server_lib.ttl",
  [{default, 120},
-  {datatype, integer}]}.
+  {datatype, {duration, s}}]}.
 
 %% @doc The handler that gets called for a tcp connections.
 {mapping, "mdns.server.handler", "mdns_server_lib.handler",
@@ -29,7 +29,7 @@
 {translation,
  "mdns_server_lib.handler",
  fun(Conf) ->
-         Setting = cuttlefish_util:conf_get_value("mdns.server.handler", Conf),
+         Setting = cuttlefish:conf_get("mdns.server.handler", Conf),
          list_to_atom(Setting)
  end
 }.
@@ -43,7 +43,7 @@
 {translation,
  "mdns_server_lib.disabled",
  fun(Conf) ->
-         case cuttlefish_util:conf_get_value("mdns.server", Conf) of
+         case cuttlefish:conf_get("mdns.server", Conf) of
              enabled ->
                  false;
              disabled ->
