@@ -3,12 +3,13 @@
   {description, ""},
   {vsn, "0.1.17"},
   {registered, []},
+  {included_applications, [mdns_client]},
   {applications, [
                   kernel,
                   stdlib,
                   ranch
                  ]},
-  {mod, { mdns_server_lib_app, [mdns_server]}},
+  {mod, { mdns_server_lib_app, []}},
   {env, [{domain, ".local"},
          {service, "generic"},
          {ip, "127.0.0.1"},
