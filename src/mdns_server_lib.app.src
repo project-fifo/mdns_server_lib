@@ -6,7 +6,8 @@
   {applications, [
                   kernel,
                   stdlib,
-                  ranch
+                  ranch,
+                  mdns_server
                  ]},
   {mod, { mdns_server_lib_app, []}},
   {env, [{domain, ".local"},
