@@ -6,10 +6,9 @@
   {applications, [
                   kernel,
                   stdlib,
-                  ranch,
-                  mdns_server
+                  ranch
                  ]},
-  {mod, { mdns_server_lib_app, []}},
+  {mod, { mdns_server_lib_app, [mdns_server]}},
   {env, [{domain, ".local"},
          {service, "generic"},
          {ip, "127.0.0.1"},
