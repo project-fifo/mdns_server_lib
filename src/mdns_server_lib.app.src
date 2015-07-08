@@ -3,7 +3,7 @@
   {description, ""},
   {vsn, "0.1.17"},
   {registered, []},
-  {included_applications, [mdns_client]},
+  {included_applications, [mdns_server]},
   {applications, [
                   kernel,
                   stdlib,
