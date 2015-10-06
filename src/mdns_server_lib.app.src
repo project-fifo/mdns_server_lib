@@ -1,6 +1,6 @@
 {application,mdns_server_lib,
              [{description,"server side for mdns client server implementation"},
-              {vsn,"0.1.19"},
+              {vsn,"0.2.0"},
               {registered,[]},
               {included_applications,[mdns_server]},
               {applications,[kernel,stdlib,ranch]},
@@ -11,7 +11,7 @@
                     {port,4223},
                     {ttl,120},
                     {handler,mdns_server_lib_debug_handler}]},
-              {contributors,["Heinz N. Gies"]},
+              {maintainers,["Heinz N. Gies"]},
               {licenses,["CDDL"]},
               {links,[{"Github",
                        "https://github.com/Licenser/mdns_server_lib"}]}]}.

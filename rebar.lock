@@ -1,4 +1,4 @@
 [{<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.6">>},1},
- {<<"mdns_server">>,{pkg,<<"mdns_server">>,<<"0.1.1">>},0},
- {<<"ranch">>,{pkg,<<"ranch">>,<<"1.1.0">>},0},
- {<<"lager">>,{pkg,<<"lager">>,<<"2.1.1">>},0}].
+ {<<"lager">>,{pkg,<<"lager">>,<<"2.1.1">>},0},
+ {<<"mdns_server">>,{pkg,<<"mdns_server">>,<<"0.2.0">>},0},
+ {<<"ranch">>,{pkg,<<"ranch">>,<<"1.1.0">>},0}].
