@@ -2,6 +2,8 @@
 
 -export([init/1, message/2]).
 
+-ignore_xref([init/1, message/2]).
+
 %%--------------------------------------------------------------------
 %% @doc This function is called when the handler is initialized.
 %%  It will return a new state used by the other callbacks.

@@ -1,4 +1,4 @@
-REBAR=$(shell pwd)/rebar
+REBAR=rebar3
 all: compile
 
 compile:
@@ -11,12 +11,12 @@ clean-docs:
 	rm doc/*.html doc/*.png doc/*.css doc/edoc-info
 
 test: all
-        $(REBAR) skip_deps=true xref
-        $(REBAR) skip_deps=true eunit
+	$(REBAR) xref
+	$(REBAR) eunit
 
 docs: clean-docs
-	@$(REBAR) doc skip_deps=true
+	@$(REBAR) doc
 
-xref: compile
-	@$(REBAR) xref skip_deps=true
+xref:
+	@$(REBAR) xref 
 

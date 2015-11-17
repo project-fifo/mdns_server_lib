@@ -67,49 +67,9 @@ handle_info(Info, State = #state{
     end;
 
 handle_info({_OK, Socket, BinData}, State = #state{
-                                               handler = Handler,
                                                claim = false,
-                                               handler_state = HandlerState,
-                                               transport = Transport,
                                                ok = _OK}) ->
-    case binary_to_term(BinData) of
-        ping ->
-            Transport:send(Socket, term_to_binary(pong)),
-            {noreply, State};
-        Data ->
-            case Handler:message(Data, HandlerState) of
-                {claim, HandlerState1} ->
-                    Transport:send(Socket, term_to_binary(noreply)),
-                    {noreply, State#state{claim = true,
-                                          handler_state = HandlerState1}};
-                {reply, Reply, HandlerState1} ->
-                    Transport:send(Socket, term_to_binary({reply, Reply})),
-                    {noreply, State#state{handler_state = HandlerState1}};
-                {noreply, HandlerState1} ->
-                    Transport:send(Socket, term_to_binary(noreply)),
-                    {noreply, State#state{handler_state = HandlerState1}};
-                {stop, normal, Reply, HandlerState1} ->
-                    Transport:send(Socket, term_to_binary({reply, Reply})),
-                    ok = Transport:close(Socket),
-                    {stop, normal, State#state{handler_state = HandlerState1}};
-                {stop, normal, HandlerState1} ->
-                    Transport:send(Socket, term_to_binary(noreply)),
-                    ok = Transport:close(Socket),
-                    {stop, normal, State#state{handler_state = HandlerState1}};
-                {stop, Reason, Reply, HandlerState1} ->
-                    Transport:send(Socket, term_to_binary({reply, Reply})),
-                    lager:warning("[mdns server] Abnormal Stop(~p), Reply: ~p / handler state was: ~p ",
-                                  [Reason, Reply, HandlerState1]),
-                    ok = Transport:close(Socket),
-                    {stop, Reason, State#state{handler_state = HandlerState1}};
-                {stop, Reason, HandlerState1} ->
-                    Transport:send(Socket, term_to_binary(noreply)),
-                    lager:warning("[mdns server] Abnormal Stop(~p), handler state was: ~p",
-                                  [Reason, HandlerState1]),
-                    ok = Transport:close(Socket),
-                    {stop, Reason, State#state{handler_state = HandlerState1}}
-            end
-    end;
+    handle_data(binary_to_term(BinData), Socket, State);
 
 handle_info(Info, State) ->
     lager:warning("[mdns server] Unknown message: ~p ",
@@ -127,3 +87,53 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+handle_data(ping, Socket, State = #state{transport = Transport}) ->
+    Transport:send(Socket, term_to_binary(pong)),
+    {noreply, State};
+
+handle_data({trace, Token = [], Data}, Socket, State) ->
+    seq_trace:set_token(Token),
+    handle_data(Data, Socket, State);
+
+handle_data({trace, Token, Data}, Socket, State) ->
+    seq_trace:set_token(Token),
+    handle_data(Data, Socket, State);
+
+
+handle_data(Data, Socket, State = #state{
+                                     handler = Handler,
+                                     handler_state = HandlerState,
+                                     transport = Transport}) ->
+    case Handler:message(Data, HandlerState) of
+        {claim, HandlerState1} ->
+            Transport:send(Socket, term_to_binary(noreply)),
+            {noreply, State#state{claim = true,
+                                  handler_state = HandlerState1}};
+        {reply, Reply, HandlerState1} ->
+            Transport:send(Socket, term_to_binary({reply, Reply})),
+            {noreply, State#state{handler_state = HandlerState1}};
+        {noreply, HandlerState1} ->
+            Transport:send(Socket, term_to_binary(noreply)),
+            {noreply, State#state{handler_state = HandlerState1}};
+        {stop, normal, Reply, HandlerState1} ->
+            Transport:send(Socket, term_to_binary({reply, Reply})),
+            ok = Transport:close(Socket),
+            {stop, normal, State#state{handler_state = HandlerState1}};
+        {stop, normal, HandlerState1} ->
+            Transport:send(Socket, term_to_binary(noreply)),
+            ok = Transport:close(Socket),
+            {stop, normal, State#state{handler_state = HandlerState1}};
+        {stop, Reason, Reply, HandlerState1} ->
+            Transport:send(Socket, term_to_binary({reply, Reply})),
+            lager:warning("[mdns server] Abnormal Stop(~p), Reply: ~p / handler state was: ~p ",
+                          [Reason, Reply, HandlerState1]),
+            ok = Transport:close(Socket),
+            {stop, Reason, State#state{handler_state = HandlerState1}};
+        {stop, Reason, HandlerState1} ->
+            Transport:send(Socket, term_to_binary(noreply)),
+            lager:warning("[mdns server] Abnormal Stop(~p), handler state was: ~p",
+                          [Reason, HandlerState1]),
+            ok = Transport:close(Socket),
+            {stop, Reason, State#state{handler_state = HandlerState1}}
+    end.
