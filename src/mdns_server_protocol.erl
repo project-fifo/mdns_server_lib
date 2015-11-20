@@ -20,13 +20,14 @@
 
 
 start_link(ListenerPid, Socket, Transport, Opts) ->
-    proc_lib:start_link(?MODULE, init, [[ListenerPid, Socket, Transport, Opts]]).
+    proc_lib:start_link(?MODULE, init,
+                        [[ListenerPid, Socket, Transport, Opts]]).
 
 init([ListenerPid, Socket, Transport, _Opts = []]) ->
     {ok, Handler} = application:get_env(mdns_server_lib, handler),
     ok = proc_lib:init_ack({ok, self()}),
     ok = ranch:accept_ack(ListenerPid),
-    ok = Transport:setopts(Socket, [{active, true}, {packet,4}]),
+    ok = Transport:setopts(Socket, [{active, true}, {packet, 4}]),
     {OK, Closed, Error} = Transport:messages(),
     {ok, State} = Handler:init(self(), []),
     gen_server:enter_loop(?MODULE, [], #state{
@@ -126,14 +127,15 @@ handle_data(Data, Socket, State = #state{
             {stop, normal, State#state{handler_state = HandlerState1}};
         {stop, Reason, Reply, HandlerState1} ->
             Transport:send(Socket, term_to_binary({reply, Reply})),
-            lager:warning("[mdns server] Abnormal Stop(~p), Reply: ~p / handler state was: ~p ",
+            lager:warning("[mdns server] Abnormal Stop(~p), Reply: ~p "
+                          "/ handler state was: ~p ",
                           [Reason, Reply, HandlerState1]),
             ok = Transport:close(Socket),
             {stop, Reason, State#state{handler_state = HandlerState1}};
         {stop, Reason, HandlerState1} ->
             Transport:send(Socket, term_to_binary(noreply)),
-            lager:warning("[mdns server] Abnormal Stop(~p), handler state was: ~p",
-                          [Reason, HandlerState1]),
+            lager:warning("[mdns server] Abnormal Stop(~p), handler state was: "
+                          "~p", [Reason, HandlerState1]),
             ok = Transport:close(Socket),
             {stop, Reason, State#state{handler_state = HandlerState1}}
     end.

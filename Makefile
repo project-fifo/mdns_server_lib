@@ -1,22 +1,13 @@
-REBAR=rebar3
+REBAR = rebar3
+
+.PHONY: all test
+
 all: compile
 
-compile:
-	@$(REBAR) compile
+include fifo.mk
 
-clean: clean-docs
-	@$(REBAR) clean
+clean:
+	$(REBAR) clean
 
-clean-docs:
-	rm doc/*.html doc/*.png doc/*.css doc/edoc-info
-
-test: all
-	$(REBAR) xref
+eunit:
 	$(REBAR) eunit
-
-docs: clean-docs
-	@$(REBAR) doc
-
-xref:
-	@$(REBAR) xref 
-
