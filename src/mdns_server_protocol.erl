@@ -107,6 +107,16 @@ handle_data(Data, Socket, State = #state{
                                      handler_state = HandlerState,
                                      transport = Transport}) ->
     case Handler:message(Data, HandlerState) of
+        {stream, StreamFn, HandlerState1} ->
+            SendFn =
+                fun (StreamData) ->
+                        Transport:send(
+                          Socket, term_to_binary({stream, StreamData}))
+                end,
+            Transport:send(Socket, term_to_binary(stream_start)),
+            StreamFn(SendFn),
+            Transport:send(Socket, term_to_binary(stream_end)),
+            {noreply, State#state{handler_state = HandlerState1}};
         {claim, HandlerState1} ->
             Transport:send(Socket, term_to_binary(noreply)),
             {noreply, State#state{claim = true,
