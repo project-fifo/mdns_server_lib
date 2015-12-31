@@ -1,6 +1,6 @@
 {application,mdns_server_lib,
              [{description,"server side for mdns client server implementation"},
-              {vsn,"0.2.2"},
+              {vsn,"0.2.3"},
               {registered,[]},
               {included_applications,[mdns_server]},
               {applications,[kernel,stdlib,ranch]},
